@@ -1,0 +1,6 @@
+*.pyc
+*.out
+*.js
+!test.js
+parsetab.py
+jsparser/**
