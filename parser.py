@@ -70,6 +70,10 @@ def t_COMMENT(t):
 
 def t_STRING(t):
     r'''("([^"\n]*(\\")*[^"\n]*)?")|('([^'\n]*(\\')*[^'\n]*)?')|(/[^/]*/[^/,;]*)'''
+    try:
+        t.value = eval(t.value)
+    except:
+        pass
     return t
 
 def t_ID(t):
@@ -261,7 +265,7 @@ def p_empty(p):
     pass
 
 def p_error(p):
-    print("Syntax error at '%s' '%d' " % p.value)
+    print("Syntax error at '%s'" % p.value)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
