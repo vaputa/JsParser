@@ -171,18 +171,18 @@ def p_expression(p):
 
 def p_dictionary(p):
     ''' dictionary      : LBRACE RBRACE
-                        | LBRACE kv_pairs RBRACE
-        kv_pairs        : expression COLON expression
+                        | LBRACE kv_pairs 
+        kv_pairs        : RBRACE
+                        | expression COLON expression RBRACE
                         | expression COLON expression COMMA kv_pairs
     '''
-    if len(p) == 3:
+    if len(p) == 2:
         p[0] = {}
-    elif len(p) == 4:
-        if isinstance(p[2], dict):
-            p[0] = p[2]
-        else:
-            p[0] = {p[1]: p[3]}
-    else :
+    elif len(p) == 3:
+        p[0] = p[2] if isinstance(p[2], dict) else {}
+    elif len(p) == 5:
+        p[0] = {p[1]: p[3]}        
+    elif len(p) == 6:
         p[5][p[1]] = p[3]
         p[0] = p[5]
 
@@ -265,7 +265,7 @@ def p_empty(p):
     pass
 
 def p_error(p):
-    print("Syntax error at '%s'" % p.value)
+    print("Syntax error at '%s' '%d' " % (p.value, p.lineno))
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
