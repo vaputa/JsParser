@@ -42,7 +42,7 @@ tokens = [
 ] + list(reserved.values())
 
 t_POINT     = r'\.'
-t_COLON     = r':'                
+t_COLON     = r':'
 t_COMMA     = r','
 t_PLUS      = r'\+'
 t_MINUS     = r'-'
@@ -65,11 +65,12 @@ def wrapper(t):
     return t if isinstance(t, list) else [t]
 
 def t_COMMENT(t):
-    r'''/\*.*\*/'''
+    r'''(/\*.*\*/)|(//.*)'''
+    print t.value
     pass
 
 def t_STRING(t):
-    r'''("([^"\n]*(\\")*[^"\n]*)?")|('([^'\n]*(\\')*[^'\n]*)?')|(/[^/]*/[^/,;]*)'''
+    r'''("([^"\n]*(\\")*[^"\n]*)?")|('([^'\n]*(\\')*[^'\n]*)?')|(/[^/]+/[^/,;]+)'''
     try:
         t.value = eval(t.value)
     except:
@@ -90,7 +91,7 @@ def t_NUMBER(t):
     return t
 
 def t_SGN(t):
-    r'''(\+|\-|\*|/|\=|\.|\>|\<)'''
+    r'''(\+|\-|\*|/|\=|\.|\>|\<)+'''
     return t
 
 def t_newline(t):
@@ -288,7 +289,7 @@ if __name__ == "__main__":
         tok = lexer.token()
         if not tok: 
             break
-        #print(tok)
+        # print(tok)
     parser = yacc.yacc()
     result = parser.parse(data)
     pprint.pprint(result, width=40, depth=8)
