@@ -66,7 +66,7 @@ def wrapper(t):
 
 def t_COMMENT(t):
     r'''(/\*.*\*/)|(//.*)'''
-    print t.value
+    # print t.value
     pass
 
 def t_STRING(t):
@@ -80,6 +80,7 @@ def t_STRING(t):
 def t_ID(t):
     r'''[a-zA-Z_][a-zA-Z_0-9]*'''
     t.type = reserved.get(t.value,'ID')    # Check for reserved words
+
     return t
 
 def t_NUMBER(t):
@@ -91,7 +92,7 @@ def t_NUMBER(t):
     return t
 
 def t_SGN(t):
-    r'''(\+|\-|\*|/|\=|\.|\>|\<)+'''
+    r'''(\+|\-|\*|/|\=|\.|\>|\<|&|\|)+'''
     return t
 
 def t_newline(t):
@@ -150,6 +151,7 @@ def p_expression(p):
     ''' expression      : expression SGN expression
                         | expression QMARK expression COLON expression
                         | expression array
+                        | LPAREN expression RPAREN
                         | VAR parameters
                         | NUMBER
                         | ID
@@ -203,7 +205,9 @@ def p_function(p):
     ''' function        : ID LPAREN RPAREN
                         | ID LPAREN parameters RPAREN
                         | FUNCTION LPAREN RPAREN LBRACE statements RBRACE
+                        | FUNCTION ID LPAREN RPAREN LBRACE statements RBRACE
                         | FUNCTION LPAREN parameters RPAREN LBRACE statements RBRACE
+                        | FUNCTION ID LPAREN parameters RPAREN LBRACE statements RBRACE
     '''
     if len(p) == 4:
         p[0] = {
@@ -223,11 +227,25 @@ def p_function(p):
             'parameters': None,
             'statements': p[5]
         }
-    else:
+    elif len(p) == 8:
+        p[0] = {
+            '__type__'  : 'function',
+            'parameters': None,
+            'statements': p[6],
+            'name': p[2]
+        } 
+    elif len(p) == 9:
         p[0] = {
             '__type__'  : 'function',
             'parameters': p[3],
             'statements': p[6]
+        }
+    else:
+        p[0] = {
+            '__type__'  : 'function',
+            'parameters': p[4],
+            'statements': p[7],
+            'name': p[2]
         }
 
 def p_statements(p):
@@ -247,6 +265,7 @@ def p_statements(p):
 
 def p_statement(p):
     ''' statement       : if_statement
+                        | function
                         | expression SEMICOLON
                         | RETURN expression SEMICOLON
     '''
@@ -284,12 +303,12 @@ if __name__ == "__main__":
     fd.close()
 
     lexer = lex.lex()
-    lexer.input(data)
-    while True:
-        tok = lexer.token()
-        if not tok: 
-            break
-        # print(tok)
+    # lexer.input(data)
+    # while True:
+    #     tok = lexer.token()
+    #     if not tok: 
+    #         break
+    #     # print(tok)
     parser = yacc.yacc()
     result = parser.parse(data)
     pprint.pprint(result, width=40, depth=8)
